@@ -1,17 +1,14 @@
-name: Deploy to cloud (GAE)
-
-on: [push]
-
+name: Deploy to Google App Engine
+on:
+  push:
+    branches:
+      - master
 jobs:
   build:
-    name: Cloud Run Deployment
+    name: GAE Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - uses: actions/checkout@v2
+      - uses: google-github-actions/deploy-appengine@main
         with:
-          project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Deploy to App Engine
-        run: gcloud app deploy app.yaml --quiet --no-promote --version v1
+          credentials: ${{ secrets.GCP_SA_KEY }}
