@@ -1,11 +1,14 @@
 import os
 
+# General:
+PAGE_TITLE = "Surfshark data engineer task"
+
 # API:
 SOIAF_ENDPOINT = "https://anapioficeandfire.com/api"
 SOIAF_PAGE_SIZE = 10
 
 # DB:
-DB_FILEPATH = os.path.join("src", "data", "db.sqlite")
+DB_FOLDERPATH = os.path.join("src", "data")
 
 BOOKS_SCHEMA = {"url": "text",
                 "name": "text",

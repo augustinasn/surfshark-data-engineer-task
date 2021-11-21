@@ -1,4 +1,5 @@
 import pandas as pd
+import streamlit as st
 import requests
 import math
 
@@ -8,8 +9,8 @@ def requests_get(url):
     response = requests.get(url)
     return response.json()
 
+@st.cache
 def get_soiaf_data(entity):
-    # Entities = ['characters', 'books', 'houses']
     output = []
     curr_page = 1
 

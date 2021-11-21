@@ -1,18 +1,24 @@
+import os
+
 import streamlit as st
 
-from api.db_client import read_table
+from constants import *
+from ui import init_sidebar
 
 
 def init_state():
-    if "is_authentcated" not in st.session_state:
-        st.session_state["is_authentcated"] = True
+    if "available_dbs" not in st.session_state:
+        st.session_state["available_dbs"] = os.listdir(DB_FOLDERPATH)
+    return st.session_state
+
+def init_ui(state):
+    menu = init_sidebar(state)
+
+    return menu
 
 def start_app():
-    init_state()
-
-    st.write("hello world!")
-    table = read_table("characters")
-    st.write(table)
+    state = init_state()
+    ui = init_ui(state)
 
 if __name__ == "__main__":
     start_app()
