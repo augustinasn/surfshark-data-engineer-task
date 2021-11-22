@@ -75,7 +75,7 @@ def total_count_of_each_entity(db_name):
           FROM books
           UNION ALL
             SELECT 'houses', count(*)
-            FROM houses
+            FROM houses;
         '''
 
     query = cur.execute(query_sql)
@@ -85,6 +85,82 @@ def total_count_of_each_entity(db_name):
 
     return df, query_sql
 
+def books_and_characters(db_name):
+    db = read_db(db_name)
+    cur = db.cursor()
+
+    query_sql_books = '''
+        SELECT b.name, b.authors, b.released, b.characters
+        FROM books b;
+        '''
+    query_sql_characters = '''
+        SELECT c.url, c.name, c.gender, c.titles, c.aliases
+        FROM characters c;
+    '''
+    
+    query_books = cur.execute(query_sql_books)
+    df_books = query_to_df(query_books)
+    query_characters = cur.execute(query_sql_characters)
+    df_characters = query_to_df(query_characters)
+
+    db.close()
+
+    def fetch_character_attr(url, attr):
+        row = df_characters.loc[df_characters["url"] == url]
+        if not row.empty:
+            val = row.iloc[0][attr]
+        else:
+            val = "-"
+        return val
+    
+    def replace_char_urls_with_attrs(urls):
+        output = ""
+        CACHE = {}
+
+        for url in urls.split(";"):
+            if url in CACHE.keys():
+                return CACHE[url]
+            # Name:
+            name = fetch_character_attr(url, "name")
+            if not name:
+                aliases =  fetch_character_attr(url, "aliases")
+                if aliases:
+                    try:
+                        name = " | ".join(aliases.split(";"))
+                    except:
+                        name = aliases
+                else:
+                    name = " - "
+            # Gender
+            gender = fetch_character_attr(url, "gender")
+            if not gender:
+                gender = " - "
+            # Titles:
+            titles = fetch_character_attr(url, "titles")
+            if titles:
+                try:
+                    titles = " | ".join(titles.split(";"))
+                except:
+                    pass
+            else:
+                titles = " - "
+
+            val = f"- Name: {name}, gender: {gender}, titles: {titles};\\n"
+            output += val
+
+            CACHE[url] = val
+
+        return output
+
+    df_books["characters"] = df_books["characters"].apply(replace_char_urls_with_attrs)
+
+    df = df_books
+    query_sql = '''Spent way too long on this query, ended up using Pandas.
+        I am pretty convinced by now that it's not possible in SQLite, however
+        if this was MySQL I would have used something from here:
+        https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows'''
+
+    return df, query_sql
 
 def read_table(db_name, table_name):
     db = read_db(db_name)
