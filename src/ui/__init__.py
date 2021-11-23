@@ -1,1 +1,0 @@
-from .sidebar import init_sidebar

@@ -2,9 +2,9 @@ import streamlit as st
 
 from constants import *
 
-from .intro import intro_ui
-from .db import db_ui
-from .queries import queries_ui
+from .intro_ui import intro_ui
+from .db_ui import db_ui
+from .queries_ui import queries_ui
 
 def init_sidebar(state):
 
@@ -12,11 +12,11 @@ def init_sidebar(state):
                        layout = "wide",
                        initial_sidebar_state = "auto")
 
-    menu_options = {"Intro": intro_ui,
-                    "DB Model": intro_ui, 
-                    "Create DB": db_ui,
+    menu_options = {"Introduction": intro_ui,
+                    "Data acquisition & DB Model": intro_ui, 
+                    "Init/remove DBs": db_ui,
                     "DB Queries": queries_ui,
-                    "Scheduler": intro_ui}
+                    "DB init scheduler": intro_ui}
                     
     header = st.sidebar.markdown(f"**{PAGE_TITLE}**")
     menu = st.sidebar.selectbox("Select menu option:", menu_options.keys())

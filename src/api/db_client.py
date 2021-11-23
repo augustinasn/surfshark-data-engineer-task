@@ -6,14 +6,18 @@ import streamlit as st
 import pandas as pd
 
 from constants import *
-
 from .data_acquisition_client import get_soiaf_data
-from .pandas_client import query_to_df
+from .pandas_client import query_to_df, replace_urls_with_col_vals
 
 def init_db():
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
     filename = f"db_{timestamp}.sqlite"
-    db = sqlite3.connect(os.path.join(DB_FOLDERPATH, filename))
+
+    try:
+        db = sqlite3.connect(os.path.join(DB_FOLDERPATH, filename))
+    except:
+        raise "Couldn't open the DB, is it deleted?"
+
     cur = db.cursor()
     
     for entity, schema in DB_SCHEMAS.items():
@@ -29,7 +33,10 @@ def init_db():
             insert_to_table(cur, i, entity)
             db.commit()
     
-    return db, filename
+    db.close()
+
+    return filename
+
 
 def insert_to_table(cur, item, entity):
     query = f'''INSERT INTO {entity} VALUES
@@ -43,6 +50,7 @@ def read_db(db_name):
     db = sqlite3.connect(os.path.join(DB_FOLDERPATH, db_name))
     return db
 
+
 def table_row_count(table_name, db):
     cur = db.cursor()
     count_query = cur.execute(f"SELECT COUNT(*) FROM {table_name}")
@@ -50,130 +58,94 @@ def table_row_count(table_name, db):
         count = row[0]
     return count
 
-def show_db_info(db, db_name):
-    cur = db.cursor()
-    timestamp = db_name.split("_")[1]
-    table_names_query = cur.execute('''SELECT name AS table_name
-                                       FROM sqlite_master
-                                       WHERE type='table'
-                                    ''')
-    table_names_df = query_to_df(table_names_query)
-    table_names_df["row_count"] = table_names_df["table_name"].apply(table_row_count, db=db)
-    table_names_df["creation_date"] = table_names_df["table_name"].apply(lambda x: timestamp)
-
-    return table_names_df
 
 def total_count_of_each_entity(db_name):
-    db = read_db(db_name)
-    cur = db.cursor()
-
     query_sql = '''
         SELECT 'characters' AS table_name, COUNT(*) AS count_of_rows
         FROM characters
         UNION ALL
-          SELECT 'books', count(*)
+          SELECT 'books', COUNT(*)
           FROM books
           UNION ALL
-            SELECT 'houses', count(*)
+            SELECT 'houses', COUNT(*)
             FROM houses;
         '''
+    df = read_table_by_query(db_name, query_sql)
 
-    query = cur.execute(query_sql)
+    return df, query_sql
 
+
+def books_and_characters(db_name):
+    query_sql = '''
+        SELECT name, authors, released, characters
+        FROM books;
+        SELECT url, name, gender, titles, aliases
+        FROM characters;
+        
+        /* Did the rest using Pandas.
+        I am pretty convinced by now that it's not possible in SQLite, however
+        if this was MySQL or something similiar, I would have used something from here:
+        https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows */
+        '''
+    
+    df_books = read_table_by_cols(db_name, table_name="books", cols=["url", "name", "authors", "released", "characters"])
+    df_characters = read_table_by_cols(db_name, table_name="characters", cols=["url", "name", "authors", "released", "characters"])
+    df_books["characters"] = df_books["characters"].apply(replace_urls_with_col_vals, df=df_characters, cols=["name", "gender", "titles", "aliases"])
+
+    return df_books, query_sql
+
+
+def character_names_and_played_by(db_name):
+    query_sql = '''
+        SELECT name, aliases, playedBy
+        FROM characters;
+        '''
+    
+    df_characters = read_table_by_query(db_name, query_sql) 
+
+    return df_characters, query_sql
+
+
+def houses_info(db_name):
+    query_sql = '''
+        SELECT name, region, overlord, swornMembers
+        FROM houses;
+        SELECT url, name, alias
+        FROM characters;
+        -- Rest is done with Pandas ;)
+        '''
+    df_houses = read_table_by_cols(db_name, "houses", "url, name, region, overlord, swornMembers")
+    df_characters = read_table_by_cols(db_name, "characters", "url, name, aliases")
+
+    df_houses["overlord"] = df_houses["overlord"].apply(replace_urls_with_col_vals, df=df_houses, cols=["name"])
+    df_houses["swornMembers"] = df_houses["swornMembers"].apply(replace_urls_with_col_vals, df=df_characters, cols=["name", "aliases"])
+
+    return df_houses, query_sql
+
+
+def read_table_by_cols(db_name, table_name, cols="*"):
+    db = read_db(db_name)
+    cur = db.cursor()
+    query = cur.execute(f'''SELECT {cols}
+                            FROM {table_name}''')
     df = query_to_df(query)
     db.close()
 
-    return df, query_sql
+    return df
 
-def books_and_characters(db_name):
+
+def read_table_by_query(db_name, query):
     db = read_db(db_name)
     cur = db.cursor()
-
-    query_sql_books = '''
-        SELECT b.name, b.authors, b.released, b.characters
-        FROM books b;
-        '''
-    query_sql_characters = '''
-        SELECT c.url, c.name, c.gender, c.titles, c.aliases
-        FROM characters c;
-    '''
-    
-    query_books = cur.execute(query_sql_books)
-    df_books = query_to_df(query_books)
-    query_characters = cur.execute(query_sql_characters)
-    df_characters = query_to_df(query_characters)
-
+    query = cur.execute(query)
+    df = query_to_df(query)
     db.close()
 
-    def fetch_character_attr(url, attr):
-        row = df_characters.loc[df_characters["url"] == url]
-        if not row.empty:
-            val = row.iloc[0][attr]
-        else:
-            val = "-"
-        return val
-    
-    def replace_char_urls_with_attrs(urls):
-        output = ""
-        CACHE = {}
+    return df
 
-        for url in urls.split(";"):
-            if url in CACHE.keys():
-                return CACHE[url]
-            # Name:
-            name = fetch_character_attr(url, "name")
-            if not name:
-                aliases =  fetch_character_attr(url, "aliases")
-                if aliases:
-                    try:
-                        name = " | ".join(aliases.split(";"))
-                    except:
-                        name = aliases
-                else:
-                    name = " - "
-            # Gender
-            gender = fetch_character_attr(url, "gender")
-            if not gender:
-                gender = " - "
-            # Titles:
-            titles = fetch_character_attr(url, "titles")
-            if titles:
-                try:
-                    titles = " | ".join(titles.split(";"))
-                except:
-                    pass
-            else:
-                titles = " - "
-
-            val = f"- Name: {name}, gender: {gender}, titles: {titles};\\n"
-            output += val
-
-            CACHE[url] = val
-
-        return output
-
-    df_books["characters"] = df_books["characters"].apply(replace_char_urls_with_attrs)
-
-    df = df_books
-    query_sql = '''Spent way too long on this query, ended up using Pandas.
-        I am pretty convinced by now that it's not possible in SQLite, however
-        if this was MySQL I would have used something from here:
-        https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows'''
-
-    return df, query_sql
-
-def read_table(db_name, table_name):
-    db = read_db(db_name)
-    cur = db.cursor()
-
-    rows = cur.execute(f"SELECT * FROM {table_name}")
-    
-    results = []
-
-    for row in rows:
-        results.append({ k:row[ix] for ix, k in enumerate(DB_SCHEMAS[table_name].keys()) })
-    
-    db.close()
-
-    return results
-
+def delete_db(db_name):
+    db_fp = os.path.join(DB_FOLDERPATH, db_name)
+    try:
+        os.remove(db_fp)
+    except:
+        raise "Can't delete this DB, perhapts it's already deleted?"

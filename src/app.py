@@ -3,7 +3,7 @@ import os
 import streamlit as st
 
 from constants import *
-from ui import init_sidebar
+from ui.sidebar import init_sidebar
 
 
 def init_state():
@@ -13,15 +13,14 @@ def init_state():
 
 def init_ui(state):
     menu = init_sidebar(state)
-
     return menu
 
 def start_app():
     state = init_state()
-    ui = init_ui(state)
+    return state, init_ui(state)
 
 if __name__ == "__main__":
-    start_app()
+    state, ui = start_app()
 
 
 
