@@ -2,4 +2,5 @@ import streamlit as st
 
 
 def intro_ui(state, name):
-    st.write("intro")
+    with open("README.md") as fh:
+        st.markdown(fh.read())

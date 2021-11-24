@@ -46,6 +46,7 @@ def insert_to_table(cur, item, entity):
 
     cur.execute(query, values)
 
+
 def read_db(db_name):
     db = sqlite3.connect(os.path.join(DB_FOLDERPATH, db_name))
     return db

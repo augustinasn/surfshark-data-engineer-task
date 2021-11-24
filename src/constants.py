@@ -59,3 +59,16 @@ HOUSES_SCHEMA = {"url": "text",
 DB_SCHEMAS = {"books": BOOKS_SCHEMA,
               "characters": CHARACTERS_SCHEMA,
               "houses": HOUSES_SCHEMA}
+
+# Scheduler:
+SCHEDULER_OPTIONS = {"2 minutes": 2 * 60,
+                     "30 minutes": 30 * 60,
+                     "4 hours": 4 * 60 * 60,
+                     "12 hours": 12 * 60 * 60,
+                     "1 day": 24 * 60 * 60,
+                     "1 week": 7 * 24 * 60 * 60}
+
+SCHEDULER_FILEPATH = os.path.join("src", "scheduler.py")
+
+# UI assets:
+MODEL_FILEPATH = os.path.join("model.png")
