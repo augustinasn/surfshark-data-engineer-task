@@ -15,6 +15,6 @@ def scheduler_ui(state, name):
 
         if schedule_btn:
             subprocess.Popen(f"python {SCHEDULER_FILEPATH} {SCHEDULER_OPTIONS[option]} {repeat}",
-                             shell=False)
+                             shell=True)
                              
             st.success(f"Successfully set a trigger to init a new DB, {option} from now.")
