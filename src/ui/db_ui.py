@@ -27,6 +27,6 @@ def db_ui(state, name):
         if create_db_btn:
             filename = init_db()
             state["available_dbs"].append(filename)
-            st.success(f"Successfully created and saved as \"{filename}\".")
+            st.success(f"Successfully created and saved as \"{filename}\", it's best to refresh the page now.")
             info_df, _ = total_count_of_each_entity(filename)
             st.dataframe(info_df)
