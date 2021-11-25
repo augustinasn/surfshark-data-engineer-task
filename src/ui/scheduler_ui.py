@@ -15,6 +15,7 @@ def scheduler_ui(state, name):
 
         st.write(os.getcwd())
         st.write(os.listdir())
+        st.write(os.environ.get("COMPUTERNAME", False))
 
         if schedule_btn:
             subprocess.Popen(f"python {SCHEDULER_FILEPATH} {SCHEDULER_OPTIONS[option]} {repeat}",
