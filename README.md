@@ -22,7 +22,7 @@ Solution proposed here consists of the following:
 - [App Engine](https://cloud.google.com/appengine) in Google Cloud Platform for hosting;
 - [GitHub action](https://github.com/augustinasn/surfshark-data-engineer-task/blob/main/.github/workflows/deploy-to-cloud.yaml) for automated deployment.
 
-Source code can be found [here](https://github.com/augustinasn/soiaf-data-client), whereas the deployed App can be reached using the following URL - https://20211119t215711-dot-surfshark-data-engineer-task.ey.r.appspot.com/
+Source code can be found [here](https://github.com/augustinasn/soiaf-data-client), whereas the deployed App can be reached using the following URL - https://surfshark-data-engineer-task.ey.r.appspot.com/
 
 
 ### Usage:
