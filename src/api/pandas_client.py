@@ -21,8 +21,13 @@ def fetch_col_val_by_url(df, url, col):
 @st.cache
 def replace_urls_with_col_vals(urls, df, cols):
     output = ""
+    CACHE = {}
 
     for url in urls.split(";"):
+        if url in CACHE.keys():
+            output += CACHE[url]
+            continue
+
         col_vals = ""
 
         for col in cols:
@@ -30,5 +35,6 @@ def replace_urls_with_col_vals(urls, df, cols):
             col_vals += f"{col}: {col_val}\\n"
             
         output += f"{col_vals}\\n"
+        CACHE[url] = f"{col_vals}\\n"
 
     return output

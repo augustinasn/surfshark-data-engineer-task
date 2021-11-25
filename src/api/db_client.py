@@ -90,7 +90,7 @@ def books_and_characters(db_name):
         '''
     
     df_books = read_table_by_cols(db_name, table_name="books", cols=["url", "name", "authors", "released", "characters"])
-    df_characters = read_table_by_cols(db_name, table_name="characters", cols=["url", "name", "authors", "released", "characters"])
+    df_characters = read_table_by_cols(db_name, table_name="characters", cols=["url", "name", "gender", "titles", "aliases"])
     df_books["characters"] = df_books["characters"].apply(replace_urls_with_col_vals, df=df_characters, cols=["name", "gender", "titles", "aliases"])
 
     return df_books, query_sql
@@ -127,6 +127,8 @@ def houses_info(db_name):
 def read_table_by_cols(db_name, table_name, cols="*"):
     db = read_db(db_name)
     cur = db.cursor()
+    if isinstance(cols, list):
+        cols = ", ".join(cols)
     query = cur.execute(f'''SELECT {cols}
                             FROM {table_name}''')
     df = query_to_df(query)
@@ -150,3 +152,6 @@ def delete_db(db_name):
         os.remove(db_fp)
     except:
         raise "Can't delete this DB, perhapts it's already deleted?"
+
+def get_list_of_dbs():
+    return os.listdir(DB_FOLDERPATH)

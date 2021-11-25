@@ -20,12 +20,12 @@ def queries_ui(state, menu):
             function = queries[query]
             output, sql_query = function(db_name)
 
+            st.write("Query:")
+            st.code(sql_query)
+
             st.write("Result:")
             
             if query in [list(queries.keys())[1], list(queries.keys())[3]]:
                 st.markdown(df_to_html_table(output), unsafe_allow_html=True)
             st.dataframe(output)
             
-            st.write("Query:")
-            
-            st.code(sql_query)

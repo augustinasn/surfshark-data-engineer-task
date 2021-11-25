@@ -18,6 +18,7 @@ Solution proposed here consists of the following:
 - Python powered back-end using [Streamlit](https://streamlit.io/) library;
 - [SQLite](https://www.sqlite.org/index.html) powered DB framework using Python API;
 - Python [Pandas](https://pandas.pydata.org/) library for data processing;
+- Python [Requests](https://docs.python-requests.org/en/latest/) library for HTTP requests;
 - [App Engine](https://cloud.google.com/appengine) in Google Cloud Platform for hosting;
 - [GitHub action](https://github.com/augustinasn/surfshark-data-engineer-task/blob/main/.github/workflows/deploy-to-cloud.yaml) for automated deployment.
 

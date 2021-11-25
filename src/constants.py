@@ -71,4 +71,4 @@ SCHEDULER_OPTIONS = {"2 minutes": 2 * 60,
 SCHEDULER_FILEPATH = os.path.join("src", "scheduler.py")
 
 # UI assets:
-MODEL_FILEPATH = os.path.join("model.png")
+MODEL_FILEPATH = os.path.join("src", "ui", "assets", "model.png")

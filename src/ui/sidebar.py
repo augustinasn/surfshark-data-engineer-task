@@ -22,8 +22,11 @@ def init_sidebar(state):
                     
     header = st.sidebar.markdown(f"**{PAGE_TITLE}**")
     menu = st.sidebar.selectbox("Select menu option:", menu_options.keys())
+    fyi = st.sidebar.write("If menu stops working - try refreshing the page with F5.")
 
-    st.write(f"{menu}:")
+    st.write(f"**{menu}**:")
     menu_options[menu](state, menu)
+
+    
     
     return menu
