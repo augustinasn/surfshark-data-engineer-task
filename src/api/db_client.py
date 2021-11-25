@@ -154,4 +154,4 @@ def delete_db(db_name):
         raise "Can't delete this DB, perhapts it's already deleted?"
 
 def get_list_of_dbs():
-    return os.listdir(DB_FOLDERPATH)
+    return [i for i in os.listdir(DB_FOLDERPATH) if ".sqlite" in i]
