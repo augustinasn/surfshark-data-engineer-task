@@ -13,6 +13,9 @@ def scheduler_ui(state, name):
 
         schedule_btn = st.form_submit_button("Schedule")
 
+        st.write(os.getcwd())
+        st.write(os.listdir())
+
         if schedule_btn:
             subprocess.Popen(f"python {SCHEDULER_FILEPATH} {SCHEDULER_OPTIONS[option]} {repeat}",
                              shell=False,
