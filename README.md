@@ -35,7 +35,7 @@ Navigate this application using the select box in the left side menu. Each menu 
 
 ### Places to improve:
 Granted if I had unlimited time resources I'd also add the following functionalities:
-- Define GCP configurationg using Terradata (as opposed to using the Console). This way I'd enable an easy and efficient TEST/PROD environment switching, faster configuration and an ability to more easily migrate to another cloud provider if need be;
+- Define GCP configurationg using Terraform (as opposed to using the Console). This way I'd enable an easy and efficient TEST/PROD environment switching, faster configuration and an ability to more easily migrate to another cloud provider if need be;
 - Set up a more sophisticated DB solution, ideally on GCP as a separate resource. This would allow more complex SQL queries and wouldn't require additional processing with Python thus saving time and compute; 
 - Set up a storage resource in GCP. App currently saves data locally, which means that it gets destroyed when redeployng the app;
 - Authentication, preferably a Google login;
